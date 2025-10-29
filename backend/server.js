@@ -10,21 +10,25 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Database connection
-const db = mysql.createConnection({
+// Database connection pool
+const db = mysql.createPool({
   host: process.env.DB_HOST || 'sql8.freesqldatabase.com',
   user: process.env.DB_USER || 'sql8804970',
   password: process.env.DB_PASSWORD || 'DNTiFkMl1a',
-  database: process.env.DB_NAME || 'sql8804970'
+  database: process.env.DB_NAME || 'sql8804970',
+  waitForConnections: true,
+  connectionLimit: 10, // max simultaneous connections
+  queueLimit: 0
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error('Database connection failed:', err);
-    return;
-  }
-  console.log('Connected to MySQL database');
-});
+// Helper to execute queries
+const query = (sql, params) =>
+  new Promise((resolve, reject) => {
+    db.query(sql, params, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
 
 // Create Feedback table if not exists
 const createTableQuery = `
@@ -38,92 +42,64 @@ const createTableQuery = `
   )
 `;
 
-db.query(createTableQuery, (err) => {
-  if (err) {
-    console.error('Error creating table:', err);
-  } else {
-    console.log('Feedback table ready');
-  }
-});
+query(createTableQuery)
+  .then(() => console.log('Feedback table ready'))
+  .catch(err => console.error('Error creating table:', err));
 
 // API Routes
 
 // GET all feedback
-app.get('/api/feedback', (req, res) => {
-  const query = 'SELECT * FROM Feedback ORDER BY created_at DESC';
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching feedback:', err);
-      return res.status(500).json({ 
-        error: 'Failed to retrieve feedback',
-        details: err.message 
-      });
-    }
+app.get('/api/feedback', async (req, res) => {
+  try {
+    const results = await query('SELECT * FROM Feedback ORDER BY created_at DESC');
     res.json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching feedback:', err);
+    res.status(500).json({ error: 'Failed to retrieve feedback', details: err.message });
+  }
 });
 
 // POST new feedback
-app.post('/api/feedback', (req, res) => {
+app.post('/api/feedback', async (req, res) => {
   const { studentName, courseCode, comments, rating } = req.body;
 
-  // Validation
   if (!studentName || !courseCode || !comments || !rating) {
-    return res.status(400).json({ 
-      error: 'All fields are required' 
-    });
+    return res.status(400).json({ error: 'All fields are required' });
   }
 
   if (rating < 1 || rating > 5) {
-    return res.status(400).json({ 
-      error: 'Rating must be between 1 and 5' 
-    });
+    return res.status(400).json({ error: 'Rating must be between 1 and 5' });
   }
 
-  const query = 'INSERT INTO Feedback (studentName, courseCode, comments, rating) VALUES (?, ?, ?, ?)';
-  
-  db.query(query, [studentName, courseCode, comments, rating], (err, result) => {
-    if (err) {
-      console.error('Error adding feedback:', err);
-      return res.status(500).json({ 
-        error: 'Failed to add feedback',
-        details: err.message 
-      });
-    }
-    res.status(201).json({ 
-      message: 'Feedback added successfully',
-      id: result.insertId 
-    });
-  });
+  try {
+    const result = await query(
+      'INSERT INTO Feedback (studentName, courseCode, comments, rating) VALUES (?, ?, ?, ?)',
+      [studentName, courseCode, comments, rating]
+    );
+    res.status(201).json({ message: 'Feedback added successfully', id: result.insertId });
+  } catch (err) {
+    console.error('Error adding feedback:', err);
+    res.status(500).json({ error: 'Failed to add feedback', details: err.message });
+  }
 });
 
 // DELETE feedback
-app.delete('/api/feedback/:id', (req, res) => {
+app.delete('/api/feedback/:id', async (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM Feedback WHERE id = ?';
-  
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error('Error deleting feedback:', err);
-      return res.status(500).json({ 
-        error: 'Failed to delete feedback',
-        details: err.message 
-      });
-    }
-    
+  try {
+    const result = await query('DELETE FROM Feedback WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ 
-        error: 'Feedback not found' 
-      });
+      return res.status(404).json({ error: 'Feedback not found' });
     }
-    
     res.json({ message: 'Feedback deleted successfully' });
-  });
+  } catch (err) {
+    console.error('Error deleting feedback:', err);
+    res.status(500).json({ error: 'Failed to delete feedback', details: err.message });
+  }
 });
 
 // GET dashboard statistics
-app.get('/api/dashboard', (req, res) => {
+app.get('/api/dashboard', async (req, res) => {
   const statsQuery = `
     SELECT 
       COUNT(*) as totalFeedback,
@@ -132,26 +108,20 @@ app.get('/api/dashboard', (req, res) => {
       MIN(rating) as lowestRating
     FROM Feedback
   `;
-  
-  db.query(statsQuery, (err, results) => {
-    if (err) {
-      console.error('Error fetching statistics:', err);
-      return res.status(500).json({ 
-        error: 'Failed to retrieve statistics',
-        details: err.message 
-      });
-    }
+
+  try {
+    const results = await query(statsQuery);
     res.json(results[0]);
-  });
+  } catch (err) {
+    console.error('Error fetching statistics:', err);
+    res.status(500).json({ error: 'Failed to retrieve statistics', details: err.message });
+  }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
-    error: 'Something went wrong!',
-    details: err.message 
-  });
+  res.status(500).json({ error: 'Something went wrong!', details: err.message });
 });
 
 app.listen(PORT, () => {
