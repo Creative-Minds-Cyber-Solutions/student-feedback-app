@@ -128,7 +128,7 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
             value={formData.courseCode}
             onChange={handleChange}
             className={errors.courseCode ? 'error' : ''}
-            placeholder="e.g., IT101, BIT202"
+            placeholder="e.g., CS101, BIDC2110"
           />
           {errors.courseCode && <span className="error-message">{errors.courseCode}</span>}
         </div>
