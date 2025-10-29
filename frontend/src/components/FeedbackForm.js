@@ -19,7 +19,7 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
       ...prev,
       [name]: value
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -57,14 +57,14 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setSubmitStatus(null);
 
     try {
-      // Removed the unused 'response' variable
+      // Removed unused 'response' variable
       await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/feedback`, {
         ...formData,
         rating: parseInt(formData.rating)
@@ -97,7 +97,7 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
   return (
     <div className="feedback-form-container">
       <h2>Submit Course Feedback</h2>
-      
+
       {submitStatus && (
         <div className={`alert alert-${submitStatus.type}`}>
           {submitStatus.message}
@@ -149,30 +149,17 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
 
         <div className="form-group">
           <label htmlFor="rating">Rating (1-5) *</label>
-          <div className="rating-container">
-            <input
-              type="number"
-              id="rating"
-              name="rating"
-              value={formData.rating}
-              onChange={handleChange}
-              className={errors.rating ? 'error' : ''}
-              min="1"
-              max="5"
-              placeholder="Rate 1-5"
-            />
-            <div className="rating-stars">
-              {[1, 2, 3, 4, 5].map(star => (
-                <span
-                  key={star}
-                  className={`star ${formData.rating >= star ? 'filled' : ''}`}
-                  onClick={() => setFormData(prev => ({ ...prev, rating: star.toString() }))}
-                >
-                
-                </span>
-              ))}
-            </div>
-          </div>
+          <input
+            type="number"
+            id="rating"
+            name="rating"
+            value={formData.rating}
+            onChange={handleChange}
+            className={errors.rating ? 'error' : ''}
+            min="1"
+            max="5"
+            placeholder="Rate 1-5"
+          />
           {errors.rating && <span className="error-message">{errors.rating}</span>}
         </div>
 

@@ -925,3 +925,123 @@ body::before {
     font-size: 1.5rem;
   }
 }
+
+/* ========================================
+   ENHANCED DASHBOARD STYLES
+   ======================================== */
+.section-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.5rem;
+  margin: 2rem 0 1.5rem 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.course-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.course-card {
+  background: linear-gradient(135deg, rgba(255, 121, 63, 0.1) 0%, rgba(120, 119, 198, 0.1) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(255, 121, 63, 0.2);
+  border-color: rgba(255, 121, 63, 0.4);
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.course-badge {
+  background: linear-gradient(135deg, #ff793f, #ff5722);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.course-rank {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.course-body {
+  text-align: center;
+}
+
+.course-rating {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.rating-large {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff793f, #ffc107);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rating-label {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 0.3rem;
+}
+
+.course-details {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-around;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: white;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .course-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
