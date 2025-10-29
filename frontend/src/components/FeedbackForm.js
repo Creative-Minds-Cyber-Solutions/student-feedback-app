@@ -58,15 +58,14 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setSubmitStatus(null);
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/feedback`, {
+      // Removed the unused 'response' variable
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/feedback`, {
         ...formData,
         rating: parseInt(formData.rating)
       });
@@ -83,9 +82,7 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
         rating: ''
       });
 
-      if (onFeedbackSubmitted) {
-        onFeedbackSubmitted();
-      }
+      if (onFeedbackSubmitted) onFeedbackSubmitted();
 
     } catch (error) {
       setSubmitStatus({
@@ -119,9 +116,7 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
             className={errors.studentName ? 'error' : ''}
             placeholder="Enter your full name"
           />
-          {errors.studentName && (
-            <span className="error-message">{errors.studentName}</span>
-          )}
+          {errors.studentName && <span className="error-message">{errors.studentName}</span>}
         </div>
 
         <div className="form-group">
@@ -135,9 +130,7 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
             className={errors.courseCode ? 'error' : ''}
             placeholder="e.g., IT101, BIT202"
           />
-          {errors.courseCode && (
-            <span className="error-message">{errors.courseCode}</span>
-          )}
+          {errors.courseCode && <span className="error-message">{errors.courseCode}</span>}
         </div>
 
         <div className="form-group">
@@ -151,9 +144,7 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
             placeholder="Share your feedback about the course..."
             rows="5"
           />
-          {errors.comments && (
-            <span className="error-message">{errors.comments}</span>
-          )}
+          {errors.comments && <span className="error-message">{errors.comments}</span>}
         </div>
 
         <div className="form-group">
@@ -177,14 +168,12 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
                   className={`star ${formData.rating >= star ? 'filled' : ''}`}
                   onClick={() => setFormData(prev => ({ ...prev, rating: star.toString() }))}
                 >
-                  ★
+                
                 </span>
               ))}
             </div>
           </div>
-          {errors.rating && (
-            <span className="error-message">{errors.rating}</span>
-          )}
+          {errors.rating && <span className="error-message">{errors.rating}</span>}
         </div>
 
         <button 
